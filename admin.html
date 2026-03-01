@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Admin Bereich</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<style>
+body { font-family: system-ui; background:#111; color:white; padding:40px;}
+img { width:150px; border-radius:12px; display:block; margin-bottom:10px;}
+.card { margin-bottom:30px; }
+button { margin-right:10px; padding:8px 12px; border:none; border-radius:8px; cursor:pointer;}
+.approve { background:green; color:white;}
+.delete { background:red; color:white;}
+</style>
+</head>
+<body>
+
+<h1>Admin – Freigaben</h1>
+
+<div id="loginBox">
+<input type="email" id="email" placeholder="Email"><br><br>
+<input type="password" id="password" placeholder="Passwort"><br><br>
+<button onclick="login()">Login</button>
+</div>
+
+<div id="adminArea" style="display:none;">
+<h2>Pending Bilder</h2>
+<div id="pending"></div>
+</div>
+
+<script>
+const supabase = window.supabase.createClient(
+  "DEINE_SUPABASE_URL",
+  "DEIN_PUBLIC_ANON_KEY"
+);
+
+async function login() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  const { error } = await supabase.auth.signInWithPassword({
+    email, password
+  });
+
+  if (!error) {
+    document.getElementById("loginBox").style.display="none";
+    document.getElementById("adminArea").style.display="block";
+    loadPending();
+  }
+}
+
+async function loadPending() {
+  const { data } = await supabase.storage
+    .from("bilder")
+    .list("pending");
+
+  const container = document.getElementById("pending");
+  container.innerHTML="";
+
+  data.forEach(file => {
+    const { data: urlData } = supabase
+      .storage
+      .from("bilder")
+      .createSignedUrl("pending/" + file.name, 60);
+
+    const card = document.createElement("div");
+    card.className="card";
+
+    const img = document.createElement("img");
+    supabase.storage
+      .from("bilder")
+      .createSignedUrl("pending/" + file.name, 60)
+      .then(res => img.src = res.data.signedUrl);
+
+    const approve = document.createElement("button");
+    approve.innerText="Freigeben";
+    approve.className="approve";
+    approve.onclick=async ()=>{
+      await supabase.storage
+        .from("bilder")
+        .move("pending/" + file.name, "public/" + file.name);
+      loadPending();
+    };
+
+    const del = document.createElement("button");
+    del.innerText="Ablehnen";
+    del.className="delete";
+    del.onclick=async ()=>{
+      await supabase.storage
+        .from("bilder")
+        .remove(["pending/" + file.name]);
+      loadPending();
+    };
+
+    card.appendChild(img);
+    card.appendChild(approve);
+    card.appendChild(del);
+    container.appendChild(card);
+  });
+}
+</script>
+
+</body>
+</html>
