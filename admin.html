@@ -29,7 +29,7 @@ button { margin-right:10px; padding:8px 12px; border:none; border-radius:8px; cu
 </div>
 
 <script>
-const supabase = window.supabase.createClient(
+const supabaseClient = window.supabase.createClient(
   "https://djwqafwatsdmtdxddsbw.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRqd3FhZndhdHNkbXRkeGRkc2J3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzOTEyNTIsImV4cCI6MjA4Nzk2NzI1Mn0.TIBteS5tozkfHnfgjdEvjjD7QJB029F9Rlv0FfFmEGU"
 );
@@ -38,7 +38,7 @@ async function login() {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
-  const { data, error } = await supabase.auth.signInWithPassword({
+  const { data, error } = await supabaseClient.auth.signInWithPassword({
     email: email,
     password: password
   });
@@ -58,7 +58,7 @@ async function login() {
 }
 
 async function loadPending() {
-  const { data } = await supabase.storage
+  const { data } = await supabaseClient.storage
     .from("bilder")
     .list("pending");
 
@@ -66,7 +66,7 @@ async function loadPending() {
   container.innerHTML="";
 
   data.forEach(file => {
-    const { data: urlData } = supabase
+    const { data: urlData } = supabaseClient
       .storage
       .from("bilder")
       .createSignedUrl("pending/" + file.name, 60);
@@ -75,7 +75,7 @@ async function loadPending() {
     card.className="card";
 
     const img = document.createElement("img");
-    supabase.storage
+    supabaseClient.storage
       .from("bilder")
       .createSignedUrl("pending/" + file.name, 60)
       .then(res => img.src = res.data.signedUrl);
@@ -84,7 +84,7 @@ async function loadPending() {
     approve.innerText="Freigeben";
     approve.className="approve";
     approve.onclick=async ()=>{
-      await supabase.storage
+      await supabaseClient.storage
         .from("bilder")
         .move("pending/" + file.name, "public/" + file.name);
       loadPending();
@@ -94,7 +94,7 @@ async function loadPending() {
     del.innerText="Ablehnen";
     del.className="delete";
     del.onclick=async ()=>{
-      await supabase.storage
+      await supabaseClient.storage
         .from("bilder")
         .remove(["pending/" + file.name]);
       loadPending();
@@ -111,5 +111,6 @@ async function loadPending() {
 </body>
 
 </html>
+
 
 
