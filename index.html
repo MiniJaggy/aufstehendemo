@@ -93,7 +93,7 @@ Stell dir vor es ist Wahl und alle gehen hin. Zusammen werden wir zu einer Kette
 </div>
 
 <script>
-const supabase = window.supabase.createClient(
+const supabaseClient = window.supabase.createClient(
   "https://djwqafwatsdmtdxddsbw.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRqd3FhZndhdHNkbXRkeGRkc2J3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzOTEyNTIsImV4cCI6MjA4Nzk2NzI1Mn0.TIBteS5tozkfHnfgjdEvjjD7QJB029F9Rlv0FfFmEGU"
 );
@@ -104,7 +104,7 @@ async function upload() {
 
   const fileName = "pending/" + Date.now() + "-" + file.name;
 
-  await supabase.storage
+  await supabaseClient.storage
     .from("bilder")
     .upload(fileName, file);
 
@@ -113,7 +113,7 @@ async function upload() {
 }
 
 async function loadGallery() {
-  const { data } = await supabase.storage
+  const { data } = await supabaseClient.storage
     .from("bilder")
     .list("public");
 
@@ -123,7 +123,7 @@ async function loadGallery() {
   if (!data) return;
 
   data.forEach(file => {
-    const { data: urlData } = supabase
+    const { data: urlData } = supabaseClient
       .storage
       .from("bilder")
       .getPublicUrl("public/" + file.name);
@@ -138,4 +138,5 @@ loadGallery();
 </script>
 
 </body>
+
 </html>
