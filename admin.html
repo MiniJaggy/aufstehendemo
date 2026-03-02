@@ -56,7 +56,6 @@ async function login() {
   document.getElementById("adminArea").style.display = "block";
   loadPending();
 }
-}
 
 async function loadPending() {
   const { data } = await supabase.storage
@@ -112,4 +111,5 @@ async function loadPending() {
 </body>
 
 </html>
+
 
