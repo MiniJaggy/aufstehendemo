@@ -38,15 +38,24 @@ async function login() {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
-  const { error } = await supabase.auth.signInWithPassword({
-    email, password
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email: email,
+    password: password
   });
 
-  if (!error) {
-    document.getElementById("loginBox").style.display="none";
-    document.getElementById("adminArea").style.display="block";
-    loadPending();
+  console.log("DATA:", data);
+  console.log("ERROR:", error);
+
+  if (error) {
+    alert("Login fehlgeschlagen: " + error.message);
+    return;
   }
+
+  alert("Login erfolgreich!");
+  document.getElementById("loginBox").style.display = "none";
+  document.getElementById("adminArea").style.display = "block";
+  loadPending();
+}
 }
 
 async function loadPending() {
@@ -103,3 +112,4 @@ async function loadPending() {
 </body>
 
 </html>
+
