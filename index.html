@@ -4,28 +4,69 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dein Gesicht für Demokratie</title>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <style>
-body { font-family: system-ui,sans-serif; margin:0; background:#f4f6f8; color:#111; }
-.container { max-width:900px; margin:auto; padding:40px 20px; }
-h1 { font-size:2.5rem; }
-.upload-box { background:white; padding:20px; border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,0.05); margin-top:30px; }
-button { padding:12px 20px; border:none; border-radius:12px; background:black; color:white; cursor:pointer; margin-top:10px; }
-button:disabled { opacity:0.6; cursor:not-allowed; }
-.gallery { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:12px; margin-top:40px; }
-.gallery img { width:100%; border-radius:12px; }
-.highlight { font-weight:bold; }
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  margin:0;
+  background: linear-gradient(135deg, #f4f6f8, #e0e7ff);
+  color:#111;
+}
+.container {
+  max-width:900px;
+  margin:auto;
+  padding:40px 20px;
+}
+h1 {
+  font-size:3rem;
+  text-align:center;
+  color:#1e1e2f;
+  margin-bottom:20px;
+}
+.upload-box {
+  background:white;
+  padding:30px;
+  border-radius:20px;
+  box-shadow:0 20px 40px rgba(0,0,0,0.1);
+  margin-top:30px;
+  transition: transform 0.3s;
+}
+.upload-box:hover { transform: translateY(-3px); }
+button {
+  padding:14px 24px;
+  border:none;
+  border-radius:12px;
+  background:#4f46e5;
+  color:white;
+  cursor:pointer;
+  margin-top:10px;
+  font-weight:600;
+  transition: background 0.3s, transform 0.2s;
+}
+button:hover { background:#6366f1; transform: translateY(-2px); }
+.gallery {
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+  gap:16px;
+  margin-top:40px;
+}
+.gallery img {
+  width:100%;
+  border-radius:16px;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+.gallery img:hover {
+  transform: scale(1.05);
+  box-shadow:0 15px 30px rgba(0,0,0,0.15);
+}
+.highlight { font-weight:bold; color:#4f46e5; }
 </style>
 </head>
-
 <body>
 <div class="container">
 <h1>Dein Gesicht für Demokratie</h1>
-<p>
-Danke, dass du ein Zeichen setzen willst. Mit deinem Foto wirst du Teil einer wachsenden digitalen Menschenkette und motivierst andere wählen zu gehen. Wir zeigen, dass wir Viele sind, dass wir zusammenstehen. Jedes Bild ist ein Statement. Stell dir vor es ist Wahl und alle gehen hin. Zusammen werden wir zu einer Kette des Anstoßes.
-</p>
+
+<p>Danke, dass du ein Zeichen setzen willst. Mit deinem Foto wirst du Teil einer wachsenden digitalen Menschenkette und motivierst andere wählen zu gehen. Wir zeigen, dass wir Viele sind, dass wir zusammenstehen. Jedes Bild ist ein Statement.</p>
 
 <h3>So machst du mit:</h3>
 <p>1. Lade ein Foto über das Formular unten hoch</p>
@@ -35,21 +76,20 @@ Danke, dass du ein Zeichen setzen willst. Mit deinem Foto wirst du Teil einer wa
 <h3>Hinweise zum Foto:</h3>
 <ul>
 <li>Bitte ein Porträtfoto</li>
-<li>Halte einen Gegenstand leicht über dem Kopf (Glocke, Wecker, Kerze etc.)</li>
+<li>Halte einen Gegenstand in einer Hand leicht über dem Kopf (z.B. Glocke, Wecker, Kerze etc.)</li>
 <li>Keine Logos oder Parteisymbole</li>
 <li>Mit dem Upload stimmst du der Veröffentlichung zu</li>
 </ul>
 
 <h3>Mit deinem Foto setzt du ein Zeichen für:</h3>
 <p class="highlight">Demokratie · Würde · Solidarität · Vielfalt</p>
-
 <p>Diese Seite ist kein soziales Netzwerk. Es geht nicht um Likes. Es geht um Haltung.</p>
 <p>Du kannst dein Foto jederzeit entfernen lassen (Mail an cafeteilzeit.de)</p>
 
 <div class="upload-box">
 <h3>Foto hochladen</h3>
 <input type="file" id="fileInput" accept="image/*"><br>
-<button id="uploadBtn" onclick="upload()">Einreichen</button>
+<button onclick="upload()">Einreichen</button>
 <p id="status"></p>
 </div>
 
@@ -57,61 +97,37 @@ Danke, dass du ein Zeichen setzen willst. Mit deinem Foto wirst du Teil einer wa
 </div>
 
 <script>
-const supabaseClient = window.supabase.createClient(
+const supabaseClient = supabase.createClient(
   "https://djwqafwatsdmtdxddsbw.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRqd3FhZndhdHNkbXRkeGRkc2J3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzOTEyNTIsImV4cCI6MjA4Nzk2NzI1Mn0.TIBteS5tozkfHnfgjdEvjjD7QJB029F9Rlv0FfFmEGU"
 );
 
-async function upload(){
-  const fileInput = document.getElementById("fileInput");
-  const file = fileInput.files[0];
-  const status = document.getElementById("status");
-  const button = document.getElementById("uploadBtn");
-
+async function upload() {
+  const file = document.getElementById("fileInput").files[0];
   if(!file){ alert("Bitte ein Bild auswählen"); return; }
+  const fileName = "pending/" + Date.now() + "-" + file.name;
 
-  button.disabled = true;
-  status.innerText = "Bild wird hochgeladen...";
+  const status = document.getElementById("status");
+  status.innerText = "Upload läuft...";
 
-  const safeName = file.name.replace(/[^a-zA-Z0-9.]/g,"");
-  const fileName = "pending/" + Date.now() + "-" + safeName;
-
-  const {error} = await supabaseClient.storage
-    .from("bilder")
-    .upload(fileName, file);
-
-  if(error){
-    status.innerText = "Upload fehlgeschlagen: " + error.message;
-    console.error(error);
-    button.disabled = false;
-    return;
-  }
+  const { error } = await supabaseClient.storage.from("bilder").upload(fileName, file);
+  if(error){ alert("Upload Fehler: " + error.message); console.error(error); status.innerText=""; return; }
 
   status.innerText = "Danke! Dein Bild wird geprüft.";
-  fileInput.value = "";
-  button.disabled = false;
 }
 
-async function loadGallery(){
-  const {data,error} = await supabaseClient.storage
-    .from("bilder")
-    .list("public");
-
+async function loadGallery() {
+  const { data } = await supabaseClient.storage.from("bilder").list("public");
   const gallery = document.getElementById("gallery");
   gallery.innerHTML = "";
-  if(error){ console.log(error); return; }
   if(!data) return;
-
-  data.forEach(file=>{
-    const {data:urlData} = supabaseClient.storage
-      .from("bilder")
-      .getPublicUrl("public/" + file.name);
+  for(const file of data){
+    const { data: urlData } = await supabaseClient.storage.from("bilder").createSignedUrl("public/" + file.name, 60);
     const img = document.createElement("img");
-    img.src = urlData.publicUrl;
+    img.src = urlData.signedUrl;
     gallery.appendChild(img);
-  });
+  }
 }
-
 loadGallery();
 </script>
 </body>
