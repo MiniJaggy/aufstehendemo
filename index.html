@@ -44,15 +44,20 @@ button {
   transition: background 0.3s, transform 0.2s;
 }
 button:hover { background:#6366f1; transform: translateY(-2px); }
+
 .gallery {
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
-  gap:16px;
+  display:flex;
+  gap:12px;
+  overflow-x:auto;
+  padding:20px 0;
   margin-top:40px;
 }
 .gallery img {
-  width:100%;
   border-radius:16px;
+  width:160px;
+  height:160px;
+  object-fit:cover;
+  flex-shrink:0;
   transition: transform 0.3s, box-shadow 0.3s;
 }
 .gallery img:hover {
@@ -60,9 +65,39 @@ button:hover { background:#6366f1; transform: translateY(-2px); }
   box-shadow:0 15px 30px rgba(0,0,0,0.15);
 }
 .highlight { font-weight:bold; color:#4f46e5; }
+
+/* Datenschutz Popup */
+#datenschutzPopup {
+  display:none;
+  position:fixed;
+  top:0; left:0; right:0; bottom:0;
+  background:rgba(0,0,0,0.6);
+  z-index:1000;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+#datenschutzContent {
+  background:white;
+  color:#111;
+  padding:30px;
+  border-radius:20px;
+  max-width:600px;
+  max-height:80vh;
+  overflow-y:auto;
+}
+#datenschutzContent h2 {
+  margin-top:0;
+}
+#datenschutzContent button {
+  background:#4f46e5;
+  color:white;
+  margin-top:20px;
+}
 </style>
 </head>
 <body>
+
 <div class="container">
 <h1>Dein Gesicht für Demokratie</h1>
 
@@ -89,11 +124,29 @@ button:hover { background:#6366f1; transform: translateY(-2px); }
 <div class="upload-box">
 <h3>Foto hochladen</h3>
 <input type="file" id="fileInput" accept="image/*"><br>
-<button onclick="upload()">Einreichen</button>
+<button id="uploadBtn">Einreichen</button>
 <p id="status"></p>
 </div>
 
 <div class="gallery" id="gallery"></div>
+</div>
+
+<!-- Datenschutz Popup -->
+<div id="datenschutzPopup">
+  <div id="datenschutzContent">
+    <h2>Datenschutzhinweis</h2>
+    <p>
+    Nachfolgend haben Sie die Möglichkeit, ein Foto von sich selbst hochzuladen.
+    Mit dem Anklicken des Buttons und dem Hochladen bestätigen Sie, dass das Foto Sie selbst darstellt und Sie mit der Verarbeitung und der Veröffentlichung durch uns einverstanden sind. Ihre Rechte zum Datenschutz finden Sie in unserer Datenschutzerklärung: 
+    <a href="https://www.nahe-kirche.de/impressum/datenschutz/" target="_blank">https://www.nahe-kirche.de/impressum/datenschutz/</a>
+    </p>
+    <p>
+    Die Fotos werden zum Zwecke der Wahl zum Verwaltungsrat am 22. März veröffentlicht und im Nachgang unmittelbar gelöscht.
+    Bitte bedenken Sie, dass Fotos, die im Internet zur Verfügung gestellt werden, durchaus auch für andere Personen verwertbar sind. Eine weitere Verarbeitung durch uns findet nicht statt, ebenso keine Weiterleitung an andere Stellen.
+    Sollten Sie im Nachgang des Hochladens nicht mehr mit der Veröffentlichung einverstanden sein, haben Sie die Möglichkeit, uns unter folgender E-Mail-Adresse ............ zu kontaktieren.
+    </p>
+    <button id="confirmDatenschutz">Ich stimme zu</button>
+  </div>
 </div>
 
 <script>
@@ -102,20 +155,27 @@ const supabaseClient = supabase.createClient(
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRqd3FhZndhdHNkbXRkeGRkc2J3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzOTEyNTIsImV4cCI6MjA4Nzk2NzI1Mn0.TIBteS5tozkfHnfgjdEvjjD7QJB029F9Rlv0FfFmEGU"
 );
 
-async function upload() {
-  const file = document.getElementById("fileInput").files[0];
-  if(!file){ alert("Bitte ein Bild auswählen"); return; }
+const uploadBtn = document.getElementById("uploadBtn");
+const fileInput = document.getElementById("fileInput");
+const status = document.getElementById("status");
+
+uploadBtn.addEventListener("click", () => {
+  if(!fileInput.files[0]) { alert("Bitte ein Bild auswählen."); return; }
+  document.getElementById("datenschutzPopup").style.display="flex";
+});
+
+// Datenschutz bestätigen
+document.getElementById("confirmDatenschutz").addEventListener("click", async () => {
+  document.getElementById("datenschutzPopup").style.display="none";
+  const file = fileInput.files[0];
   const fileName = "pending/" + Date.now() + "-" + file.name;
-
-  const status = document.getElementById("status");
   status.innerText = "Upload läuft...";
-
   const { error } = await supabaseClient.storage.from("bilder").upload(fileName, file);
-  if(error){ alert("Upload Fehler: " + error.message); console.error(error); status.innerText=""; return; }
-
+  if(error){ alert("Upload Fehler: "+error.message); console.error(error); status.innerText=""; return; }
   status.innerText = "Danke! Dein Bild wird geprüft.";
-}
+});
 
+// Galerie laden
 async function loadGallery() {
   const { data } = await supabaseClient.storage.from("bilder").list("public");
   const gallery = document.getElementById("gallery");
@@ -130,5 +190,6 @@ async function loadGallery() {
 }
 loadGallery();
 </script>
+
 </body>
 </html>
