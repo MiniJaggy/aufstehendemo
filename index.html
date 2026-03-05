@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dein Gesicht für Demokratie</title>
 
-<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 
 <style>
 
@@ -128,9 +128,9 @@ Stell dir vor es ist Wahl und alle gehen hin. Zusammen werden wir zu einer Kette
 
 const { createClient } = supabase
 
-const supabaseClient = createClient(
-"https://djwqafwatsdmtdxddsbw.supabase.co",
-"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRqd3FhZndhdHNkbXRkeGRkc2J3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzOTEyNTIsImV4cCI6MjA4Nzk2NzI1Mn0.TIBteS5tozkfHnfgjdEvjjD7QJB029F9Rlv0FfFmEGU"
+const supabaseClient = window.supabase.createClient(
+  "https://djwqafwatsdmtdxddsbw.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRqd3FhZndhdHNkbXRkeGRkc2J3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzOTEyNTIsImV4cCI6MjA4Nzk2NzI1Mn0.TIBteS5tozkfHnfgjdEvjjD7QJB029F9Rlv0FfFmEGU"
 )
 
 
@@ -230,3 +230,4 @@ loadGallery()
 
 </body>
 </html>
+
