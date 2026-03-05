@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dein Gesicht für Demokratie</title>
-<<script src="https://unpkg.com/@supabase/supabase-js@2"></script>>
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <style>
 body {
   font-family: system-ui, sans-serif;
@@ -93,24 +93,31 @@ Stell dir vor es ist Wahl und alle gehen hin. Zusammen werden wir zu einer Kette
 </div>
 
 <script>
-const supabaseClient = supabase.createClient(
+const { createClient } = supabase;
+
+const supabaseClient = createClient(
   "https://djwqafwatsdmtdxddsbw.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRqd3FhZndhdHNkbXRkeGRkc2J3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzOTEyNTIsImV4cCI6MjA4Nzk2NzI1Mn0.TIBteS5tozkfHnfgjdEvjjD7QJB029F9Rlv0FfFmEGU"
 );
 
 async function upload() {
+
   const file = document.getElementById("fileInput").files[0];
-  if (!file) return;
+
+  if (!file) {
+    alert("Bitte ein Bild auswählen");
+    return;
+  }
 
   const fileName = "pending/" + Date.now() + "-" + file.name;
 
-  const { error } = await supabase.storage
+  const { data, error } = await supabaseClient.storage
     .from("bilder")
     .upload(fileName, file);
 
   if (error) {
-    document.getElementById("status").innerText =
-      "Upload fehlgeschlagen: " + error.message;
+    alert("Upload Fehler: " + error.message);
+    console.log(error);
     return;
   }
 
@@ -146,6 +153,7 @@ loadGallery();
 </body>
 
 </html>
+
 
 
 
