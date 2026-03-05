@@ -6,19 +6,21 @@
 <title>Admin – Freigaben</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
-body { font-family: system-ui, sans-serif; background:#111; color:white; padding:40px; }
-img { width:150px; border-radius:12px; display:block; margin-bottom:10px; }
-.card { margin-bottom:30px; background:#222; padding:15px; border-radius:12px; }
+body { font-family: 'Inter', system-ui, sans-serif; background:#0f0f1a; color:white; padding:40px; }
+img { width:150px; border-radius:12px; object-fit:cover; }
+.card { background:#1a1a2e; padding:20px; border-radius:16px; margin-bottom:20px; display:flex; align-items:center; gap:20px; transition: transform 0.2s, box-shadow 0.2s; }
+.card:hover { transform: translateY(-3px); box-shadow:0 10px 25px rgba(0,0,0,0.3); }
 button { margin-right:10px; padding:8px 12px; border:none; border-radius:8px; cursor:pointer; }
-.approve { background:green; color:white; }
-.delete { background:red; color:white; }
 button:disabled { opacity:0.6; cursor:not-allowed; }
+button.approve { background:#10b981; }
+button.approve:hover { background:#059669; }
+button.delete { background:#ef4444; }
+button.delete:hover { background:#b91c1c; }
 #loginBox { max-width:300px; margin-bottom:40px; }
 input { width:100%; padding:8px; margin-bottom:10px; border-radius:6px; border:none; }
 </style>
 </head>
 <body>
-
 <h1>Admin – Freigaben</h1>
 
 <div id="loginBox">
@@ -33,118 +35,58 @@ input { width:100%; padding:8px; margin-bottom:10px; border-radius:6px; border:n
 </div>
 
 <script>
-const supabaseClient = window.supabase.createClient(
+const supabaseClient = supabase.createClient(
   "https://djwqafwatsdmtdxddsbw.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRqd3FhZndhdHNkbXRkeGRkc2J3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzOTEyNTIsImV4cCI6MjA4Nzk2NzI1Mn0.TIBteS5tozkfHnfgjdEvjjD7QJB029F9Rlv0FfFmEGU"
 );
 
-// Login-Funktion
 async function login(){
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
-
-  const { data, error } = await supabaseClient.auth.signInWithPassword({
-    email, password
-  });
-
-  if(error){
-    alert("Login fehlgeschlagen: " + error.message);
-    return;
-  }
-
+  const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+  if(error){ alert("Login fehlgeschlagen: "+error.message); return; }
   alert("Login erfolgreich!");
-  document.getElementById("loginBox").style.display = "none";
-  document.getElementById("adminArea").style.display = "block";
+  document.getElementById("loginBox").style.display="none";
+  document.getElementById("adminArea").style.display="block";
   loadPending();
 }
 
-// Pending Bilder laden
 async function loadPending(){
+  const container = document.getElementById("pending");
+  container.innerHTML="";
   const { data, error } = await supabaseClient.storage.from("bilder").list("pending");
   if(error){ console.log(error); return; }
+  if(!data || data.length===0) return;
 
-  const container = document.getElementById("pending");
-  container.innerHTML = "";
+  for(const file of data){
+    const card = document.createElement("div"); card.className="card";
 
-  data.forEach(file=>{
-    const card = document.createElement("div");
-    card.className="card";
-
-    // Bild anzeigen
     const img = document.createElement("img");
-    supabaseClient.storage.from("bilder")
-      .createSignedUrl("pending/" + file.name, 60)
-      .then(res=> img.src = res.data.signedUrl);
+    const { data: urlData } = await supabaseClient.storage.from("bilder").createSignedUrl("pending/"+file.name,60);
+    img.src = urlData.signedUrl;
 
-    // Freigeben Button
-    const approve = document.createElement("button");
-    approve.innerText = "Freigeben";
-    approve.className = "approve";
-    approve.onclick = async () => {
-      approve.innerText = "Freigabe läuft...";
-      approve.disabled = true;
-
-      // 1. Kopieren nach public
-      const { error: copyError } = await supabaseClient.storage
-        .from("bilder")
-        .copy("pending/" + file.name, "public/" + file.name);
-
-      if(copyError){
-        alert("Fehler beim Freigeben: " + copyError.message);
-        console.error(copyError);
-        approve.innerText = "Freigeben";
-        approve.disabled = false;
-        return;
-      }
-
-      // 2. Löschen aus pending
-      const { error: delError } = await supabaseClient.storage
-        .from("bilder")
-        .remove(["pending/" + file.name]);
-
-      if(delError){
-        alert("Fehler beim Löschen des Originals: " + delError.message);
-        console.error(delError);
-        approve.innerText = "Freigeben";
-        approve.disabled = false;
-        return;
-      }
-
-      // 3. Liste neu laden
-      loadPending();
+    const approve = document.createElement("button"); approve.innerText="Freigeben"; approve.className="approve";
+    approve.onclick = async ()=>{
+      approve.innerText="Freigabe läuft..."; approve.disabled=true;
+      const { error: copyError } = await supabaseClient.storage.from("bilder").copy("pending/"+file.name,"public/"+file.name);
+      if(copyError){ alert(copyError.message); approve.innerText="Freigeben"; approve.disabled=false; return; }
+      const { error: delError } = await supabaseClient.storage.from("bilder").remove(["pending/"+file.name]);
+      if(delError){ alert(delError.message); approve.innerText="Freigeben"; approve.disabled=false; return; }
+      await loadPending();
     };
 
-    // Ablehnen Button
-    const del = document.createElement("button");
-    del.innerText = "Ablehnen";
-    del.className = "delete";
-    del.onclick = async () => {
-      del.innerText = "Löschen...";
-      del.disabled = true;
-
-      const { error: delError } = await supabaseClient.storage
-        .from("bilder")
-        .remove(["pending/" + file.name]);
-
-      if(delError){
-        alert("Fehler beim Löschen: " + delError.message);
-        console.error(delError);
-        del.innerText = "Ablehnen";
-        del.disabled = false;
-        return;
-      }
-
-      loadPending();
+    const del = document.createElement("button"); del.innerText="Ablehnen"; del.className="delete";
+    del.onclick = async ()=>{
+      del.innerText="Löschen..."; del.disabled=true;
+      const { error: delError } = await supabaseClient.storage.from("bilder").remove(["pending/"+file.name]);
+      if(delError){ alert(delError.message); del.innerText="Ablehnen"; del.disabled=false; return; }
+      await loadPending();
     };
 
-    // Buttons und Bild zur Karte hinzufügen
-    card.appendChild(img);
-    card.appendChild(approve);
-    card.appendChild(del);
+    card.appendChild(img); card.appendChild(approve); card.appendChild(del);
     container.appendChild(card);
-  });
+  }
 }
 </script>
-
 </body>
 </html>
