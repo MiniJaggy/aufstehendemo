@@ -5,199 +5,341 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dein Gesicht für Demokratie</title>
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
 <style>
-body {
-  font-family: 'Inter', system-ui, sans-serif;
-  margin:0;
-  background: linear-gradient(135deg, #f4f6f8, #e0e7ff);
-  color:#111;
-}
-.container {
-  max-width:600px;
-  margin:auto;
-  padding:40px 20px;
-}
-h1 {
-  font-size:3rem;
-  text-align:center;
-  color:#1e1e2f;
-  margin-bottom:20px;
-}
-.upload-box {
-  background:white;
-  padding:30px;
-  border-radius:20px;
-  box-shadow:0 20px 40px rgba(0,0,0,0.1);
-  margin-top:30px;
-  transition: transform 0.3s;
-}
-.upload-box:hover { transform: translateY(-3px); }
-button {
-  padding:14px 24px;
-  border:none;
-  border-radius:12px;
-  background:#4f46e5;
-  color:white;
-  cursor:pointer;
-  margin-top:10px;
-  font-weight:600;
-  transition: background 0.3s, transform 0.2s;
-}
-button:hover { background:#6366f1; transform: translateY(-2px); }
 
-.gallery {
-  display:flex;
-  flex-direction:column;
-  gap:20px;
-  margin-top:40px;
-  align-items:center;
+body{
+font-family:'Inter',system-ui,sans-serif;
+margin:0;
+background:linear-gradient(135deg,#f4f6f8,#e0e7ff);
+color:#111;
 }
 
-.gallery img {
-  max-height:200px;   /* Höhe begrenzt, Breite skaliert automatisch */
-  width:auto;
-  border-radius:16px;
-  transition: transform 0.3s, box-shadow 0.3s;
+.container{
+max-width:600px;
+margin:auto;
+padding:40px 20px;
 }
 
-.gallery img:hover {
-  transform: scale(1.05);
-  box-shadow:0 15px 30px rgba(0,0,0,0.15);
+h1{
+font-size:3rem;
+text-align:center;
+color:#1e1e2f;
+margin-bottom:20px;
 }
 
-.highlight { font-weight:bold; color:#4f46e5; }
+.intro{
+line-height:1.8; /* 50% größerer Zeilenabstand */
+}
+
+.upload-box{
+background:white;
+padding:30px;
+border-radius:20px;
+box-shadow:0 20px 40px rgba(0,0,0,0.1);
+margin-top:30px;
+}
+
+button{
+padding:14px 24px;
+border:none;
+border-radius:12px;
+background:#4f46e5;
+color:white;
+cursor:pointer;
+margin-top:10px;
+font-weight:600;
+transition:0.2s;
+}
+
+button:hover{
+background:#6366f1;
+transform:translateY(-2px);
+}
+
+.gallery{
+display:flex;
+flex-direction:column;
+gap:20px;
+margin-top:40px;
+align-items:center;
+}
+
+.gallery img{
+max-height:200px;
+width:auto;
+border-radius:16px;
+}
+
+.highlight{
+font-weight:bold;
+color:#4f46e5;
+}
+
+/* Bild unter Upload */
+.upload-image{
+width:100%;
+border-radius:16px;
+margin-top:20px;
+}
 
 /* Datenschutz Popup */
-#datenschutzPopup {
-  display:none;
-  position:fixed;
-  top:0; left:0; right:0; bottom:0;
-  background:rgba(0,0,0,0.6);
-  z-index:1000;
-  display:flex;
-  justify-content:center;
-  align-items:center;
+
+#datenschutzPopup{
+display:none;
+position:fixed;
+top:0;
+left:0;
+right:0;
+bottom:0;
+background:rgba(0,0,0,0.6);
+z-index:1000;
+justify-content:center;
+align-items:center;
 }
-#datenschutzContent {
-  background:white;
-  color:#111;
-  padding:30px;
-  border-radius:20px;
-  max-width:600px;
-  max-height:80vh;
-  overflow-y:auto;
+
+#datenschutzContent{
+background:white;
+padding:30px;
+border-radius:20px;
+max-width:600px;
+max-height:80vh;
+overflow:auto;
 }
-#datenschutzContent h2 {
-  margin-top:0;
+
+.popup-buttons{
+display:flex;
+gap:10px;
+margin-top:20px;
 }
-#datenschutzContent button {
-  background:#4f46e5;
-  color:white;
-  margin-top:20px;
+
+.popup-buttons button{
+flex:1;
 }
+
 </style>
 </head>
+
 <body>
 
 <div class="container">
+
 <h1>Dein Gesicht für Demokratie</h1>
 
-<p>Danke, dass du ein Zeichen setzen willst. Mit deinem Foto wirst du Teil einer wachsenden digitalen Menschenkette und motivierst andere wählen zu gehen. Wir zeigen, dass wir Viele sind, dass wir zusammenstehen. Jedes Bild ist ein Statement. Stell die vor es ist Wahl und alle gehen hin. Zusammen werden wir zu einer Kette des Anstoßes.</p>
+<p class="intro">
+Danke, dass du ein Zeichen setzen willst. Mit deinem Foto wirst du Teil einer wachsenden digitalen Menschenkette und motivierst andere wählen zu gehen. Wir zeigen, dass wir Viele sind, dass wir zusammenstehen. Jedes Bild ist ein Statement. Stell dir vor es ist Wahl und alle gehen hin. Zusammen werden wir zu einer Kette des Anstoßes.
+</p>
 
 <h3>So machst du mit:</h3>
+
 <p>1. Lade ein Foto über das Formular unten hoch</p>
 <p>2. Wir prüfen es kurz (kein automatischer Upload)</p>
 <p>3. Danach wird dein Bild Teil der Menschenkette</p>
 
 <h3>Hinweise zum Foto</h3>
-<li>Damit unsere Kette ein starkes, einheitliches Bild ergibt:</li>
+
 <ul>
 <li>Bitte ein Porträtfoto</li>
-<li>Du wählst einen Gegenstand mit dem du anstoßen möchtest, zb. eine Glocke, einen Wecker oder was du möchtest, werde kreativ </li>
-<li>Halte einen Gegenstand in einer Hand leicht über dem Kopf </li>
-<li>Das ergibt eine geschlossene starke Kette</li>
-<li>Bitte keine Symbole, Logos oder politischen Parteizeichen. Bilder die dies nicht einhalten, werden nicht hochgeladen.</li>
+<li>Halte einen Gegenstand über dem Kopf</li>
+<li>Keine Logos oder Parteisymbole</li>
 <li>Mit dem Upload stimmst du der Veröffentlichung zu</li>
 </ul>
 
 <h3>Mit deinem Foto setzt du ein Zeichen für:</h3>
+
 <p class="highlight">Demokratie · Menschenwürde · Solidarität · Vielfalt</p>
+
 <p>Diese Seite ist kein soziales Netzwerk. Es geht nicht um Likes. Es geht um Haltung.</p>
-<p>Dein Bild wird ausschließlich auf dieser Webseite veröffentlicht.<p>
-<p>Du kannst dein Foto jederzeit entfernen lassen (Mail an www.cafeteilzeit@web.de)</p>
-<a href="https://www.nahe-kirche.de/impressum/datenschutz/" target="_blank">https://www.nahe-kirche.de/impressum/datenschutz/</a>
+
+<p>Du kannst dein Foto jederzeit entfernen lassen (Mail an cafeteilzeit@web.de)</p>
+
+<a href="https://www.nahe-kirche.de/impressum/datenschutz/" target="_blank">Datenschutzerklärung</a>
 
 <div class="upload-box">
+
 <h3>Foto hochladen</h3>
+
 <input type="file" id="fileInput" accept="image/*"><br>
+
 <button id="uploadBtn">Einreichen</button>
+
 <p id="status"></p>
+
+<!-- HIER DEIN BILD EINSETZEN -->
+<img src="DEIN_BILD.jpg" class="upload-image">
+
 </div>
 
 <div class="gallery" id="gallery"></div>
+
 </div>
 
+
 <!-- Datenschutz Popup -->
+
 <div id="datenschutzPopup">
-  <div id="datenschutzContent">
-    <h2>Datenschutzhinweis</h2>
-    <p>
-    Nachfolgend haben Sie die Möglichkeit, ein Foto von sich selbst hochzuladen.
-    Mit dem Anklicken des Buttons und dem Hochladen bestätigen Sie, dass das Foto Sie selbst darstellt und Sie mit der Verarbeitung und der Veröffentlichung durch uns einverstanden sind. Ihre Rechte zum Datenschutz finden Sie in unserer Datenschutzerklärung: 
-    <a href="https://www.nahe-kirche.de/impressum/datenschutz/" target="_blank">https://www.nahe-kirche.de/impressum/datenschutz/</a>
-    </p>
-    <p>
-    Die Fotos werden zum Zwecke der Landtagswahl am 22. März veröffentlicht und im Nachgang unmittelbar gelöscht.
-    Bitte bedenken Sie, dass Fotos, die im Internet zur Verfügung gestellt werden, durchaus auch für andere Personen verwertbar sind. Eine weitere Verarbeitung durch uns findet nicht statt, ebenso keine Weiterleitung an andere Stellen.
-    Sollten Sie im Nachgang des Hochladens nicht mehr mit der Veröffentlichung einverstanden sein, haben Sie die Möglichkeit, uns unter folgender E-Mail-Adresse www.cafeteilzeit@web.de zu kontaktieren.
-    </p>
-    <button id="confirmDatenschutz">Ich stimme zu</button>
-  </div>
+
+<div id="datenschutzContent">
+
+<h2>Datenschutzhinweis</h2>
+
+<p>
+Nachfolgend haben Sie die Möglichkeit, ein Foto von sich selbst hochzuladen.
+Mit dem Anklicken des Buttons bestätigen Sie, dass das Foto Sie selbst darstellt und Sie mit der Verarbeitung und Veröffentlichung einverstanden sind.
+</p>
+
+<p>
+Fotos werden zum Zwecke der Wahl veröffentlicht und danach gelöscht.
+Fotos im Internet können auch von anderen gespeichert werden.
+</p>
+
+<p>
+Falls Sie später nicht mehr einverstanden sind, kontaktieren Sie uns unter:
+<b>cafeteilzeit@web.de</b>
+</p>
+
+<div class="popup-buttons">
+
+<button id="confirmDatenschutz">Ich stimme zu</button>
+
+<button id="cancelDatenschutz" style="background:#aaa;">
+Ich stimme nicht zu
+</button>
+
+</div>
+
+</div>
 </div>
 
 <script>
+
 const supabaseClient = supabase.createClient(
-  "https://djwqafwatsdmtdxddsbw.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRqd3FhZndhdHNkbXRkeGRkc2J3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzOTEyNTIsImV4cCI6MjA4Nzk2NzI1Mn0.TIBteS5tozkfHnfgjdEvjjD7QJB029F9Rlv0FfFmEGU"
+"https://djwqafwatsdmtdxddsbw.supabase.co",
+"DEIN_ANON_KEY"
 );
 
-const uploadBtn = document.getElementById("uploadBtn");
-const fileInput = document.getElementById("fileInput");
-const status = document.getElementById("status");
+const uploadBtn=document.getElementById("uploadBtn");
+const fileInput=document.getElementById("fileInput");
+const status=document.getElementById("status");
 
-uploadBtn.addEventListener("click", () => {
-  if(!fileInput.files[0]) { alert("Bitte ein Bild auswählen."); return; }
-  document.getElementById("datenschutzPopup").style.display="flex";
-});
-
-document.getElementById("confirmDatenschutz").addEventListener("click", async () => {
-  document.getElementById("datenschutzPopup").style.display="none";
-  const file = fileInput.files[0];
-  const fileName = "pending/" + Date.now() + "-" + file.name;
-  status.innerText = "Upload läuft...";
-  const { error } = await supabaseClient.storage.from("bilder").upload(fileName, file);
-  if(error){ alert("Upload Fehler: "+error.message); console.error(error); status.innerText=""; return; }
-  status.innerText = "Danke! Dein Bild wird geprüft.";
-});
-
-// Vertikale Galerie laden
-async function loadGallery() {
-  const { data } = await supabaseClient.storage.from("bilder").list("public");
-  const gallery = document.getElementById("gallery");
-  gallery.innerHTML = "";
-  if(!data) return;
-  for(const file of data){
-    const { data: urlData } = await supabaseClient.storage.from("bilder").createSignedUrl("public/" + file.name, 60);
-    const img = document.createElement("img");
-    img.src = urlData.signedUrl;
-    gallery.appendChild(img);
-  }
+uploadBtn.addEventListener("click",()=>{
+if(!fileInput.files[0]){
+alert("Bitte ein Bild auswählen.");
+return;
 }
+document.getElementById("datenschutzPopup").style.display="flex";
+});
+
+document.getElementById("cancelDatenschutz").onclick=()=>{
+document.getElementById("datenschutzPopup").style.display="none";
+};
+
+document.getElementById("confirmDatenschutz").onclick=async()=>{
+
+document.getElementById("datenschutzPopup").style.display="none";
+
+const file=fileInput.files[0];
+
+status.innerText="Bild wird optimiert...";
+
+const optimized=await resizeImage(file);
+
+const fileName="pending/"+Date.now()+"-"+file.name;
+
+status.innerText="Upload läuft...";
+
+const {error}=await supabaseClient.storage
+.from("bilder")
+.upload(fileName,optimized);
+
+if(error){
+alert("Upload Fehler: "+error.message);
+status.innerText="";
+return;
+}
+
+status.innerText="Danke! Dein Bild wird geprüft.";
+
+};
+
+
+
+async function resizeImage(file){
+
+return new Promise(resolve=>{
+
+const img=new Image();
+const canvas=document.createElement("canvas");
+const ctx=canvas.getContext("2d");
+
+img.onload=function(){
+
+const max=1600;
+
+let width=img.width;
+let height=img.height;
+
+if(width>max || height>max){
+
+if(width>height){
+height*=max/width;
+width=max;
+}else{
+width*=max/height;
+height=max;
+}
+
+}
+
+canvas.width=width;
+canvas.height=height;
+
+ctx.drawImage(img,0,0,width,height);
+
+canvas.toBlob(blob=>{
+resolve(blob);
+},"image/jpeg",0.85);
+
+};
+
+img.src=URL.createObjectURL(file);
+
+});
+
+}
+
+
+async function loadGallery(){
+
+const {data}=await supabaseClient.storage
+.from("bilder")
+.list("public");
+
+const gallery=document.getElementById("gallery");
+
+gallery.innerHTML="";
+
+if(!data) return;
+
+for(const file of data){
+
+const {data:urlData}=await supabaseClient.storage
+.from("bilder")
+.createSignedUrl("public/"+file.name,60);
+
+const img=document.createElement("img");
+
+img.src=urlData.signedUrl;
+
+gallery.appendChild(img);
+
+}
+
+}
+
 loadGallery();
+
 </script>
 
 </body>
 </html>
-
-
-
