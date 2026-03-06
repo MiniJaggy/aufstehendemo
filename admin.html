@@ -122,54 +122,100 @@ async function loadGalleries(){
 
 // --- Card erstellen ---
 function createCard(url, fileName, isPending){
+
   const card = document.createElement("div");
   card.className="card";
 
   const img = document.createElement("img");
   img.src = url;
+
   let rotation = 0;
 
-  // Rotations Buttons nur für Pending
-  if(isPending){
-    const rotateLeft = document.createElement("button");
-    rotateLeft.innerText="⟲";
-    rotateLeft.className="rotate";
-    rotateLeft.onclick = ()=>{
-      rotation -= 90;
-      img.style.transform = `rotate(${rotation}deg)`;
-    };
+  const rotateLeft = document.createElement("button");
+  rotateLeft.innerText="⟲";
+  rotateLeft.className="rotate";
+  rotateLeft.onclick = ()=>{
+    rotation -= 90;
+    img.style.transform = `rotate(${rotation}deg)`;
+  };
 
-    const rotateRight = document.createElement("button");
-    rotateRight.innerText="⟳";
-    rotateRight.className="rotate";
-    rotateRight.onclick = ()=>{
-      rotation += 90;
-      img.style.transform = `rotate(${rotation}deg)`;
-    };
-
-    card.appendChild(rotateLeft);
-    card.appendChild(rotateRight);
-  }
+  const rotateRight = document.createElement("button");
+  rotateRight.innerText="⟳";
+  rotateRight.className="rotate";
+  rotateRight.onclick = ()=>{
+    rotation += 90;
+    img.style.transform = `rotate(${rotation}deg)`;
+  };
 
   const approveBtn = document.createElement("button");
   approveBtn.innerText="Freigeben";
   approveBtn.className="approve";
+
   approveBtn.onclick = async ()=>{
-    await supabaseClient.storage.from("bilder").move("pending/" + fileName, "public/" + fileName);
+
+    const response = await fetch(url);
+    const blob = await response.blob();
+
+    const imageBitmap = await createImageBitmap(blob);
+
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+
+    const angle = rotation % 360;
+
+    if(angle === 90 || angle === -270 || angle === -90 || angle === 270){
+      canvas.width = imageBitmap.height;
+      canvas.height = imageBitmap.width;
+    } else {
+      canvas.width = imageBitmap.width;
+      canvas.height = imageBitmap.height;
+    }
+
+    ctx.translate(canvas.width/2, canvas.height/2);
+    ctx.rotate(angle * Math.PI / 180);
+    ctx.drawImage(imageBitmap, -imageBitmap.width/2, -imageBitmap.height/2);
+
+    const rotatedBlob = await new Promise(resolve =>
+      canvas.toBlob(resolve, "image/jpeg", 0.9)
+    );
+
+    // hochladen
+    await supabaseClient.storage
+      .from("bilder")
+      .upload("public/" + fileName, rotatedBlob, {
+        contentType: "image/jpeg"
+      });
+
+    // original löschen
+    await supabaseClient.storage
+      .from("bilder")
+      .remove(["pending/" + fileName]);
+
     loadGalleries();
   };
 
   const deleteBtn = document.createElement("button");
   deleteBtn.innerText="Löschen";
   deleteBtn.className="delete";
+
   deleteBtn.onclick = async ()=>{
-    const bucketPath = isPending ? "pending/" + fileName : "public/" + fileName;
-    await supabaseClient.storage.from("bilder").remove([bucketPath]);
+    const path = isPending ? "pending/" + fileName : "public/" + fileName;
+
+    await supabaseClient.storage
+      .from("bilder")
+      .remove([path]);
+
     loadGalleries();
   };
 
   card.appendChild(img);
-  if(isPending) card.appendChild(approveBtn);
+
+  if(isPending){
+    card.appendChild(rotateLeft);
+    card.appendChild(rotateRight);
+    card.appendChild(approveBtn);
+  }
+
   card.appendChild(deleteBtn);
 
   return card;
@@ -178,3 +224,4 @@ function createCard(url, fileName, isPending){
 </script>
 </body>
 </html>
+
